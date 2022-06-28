@@ -1,0 +1,28 @@
+$primary: #2A2975;
+$secondary: #FFA401;
+
+button {
+    cursor: pointer;
+    border: 1px solid #333;
+    background: #eaeaea;
+    color: #333;
+    transition: .5s;
+}
+
+button:hover {
+    background: #333;
+    color: white;
+    box-shadow: 0 0 4px #333;
+}
+
+button.primary {
+    background: $primary;
+    color: white;
+    border: none;
+}
+
+button.secondary {
+    background: $secondary;
+    color: #333;
+    border: none;
+}

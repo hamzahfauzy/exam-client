@@ -1,2 +1,74 @@
 @import 'components/form.scss';
 @import 'components/input.scss';
+@import 'components/button.scss';
+
+$primary:#2A2975;
+$secondary:#FFA401;
+
+@font-face {
+    font-family: Avenir;
+    src: url('../assets/fonts/avenir_ff/AvenirLTStd-Book.otf');
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+}
+
+.card{
+    width:450px;
+    border:1px solid #333;
+    padding:20px 40px;
+    border-radius: 6px;
+    margin: auto;
+    margin-top: 5%;
+    text-align: center;
+
+    .card-header {
+        border-bottom: 1px solid #333;
+        padding-bottom: 20px;
+    }
+    
+    .card-body{
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin:20px 0;
+    }
+
+    .card-footer {
+        border-top: 1px solid #333;
+        padding-top: 20px;
+    }
+}
+
+.exam{
+    text-align: left;
+    margin:12px 0;
+    
+    .option{
+        margin:6px 0;
+    
+        label{
+            margin-left: 12px;
+        }
+    
+    }
+}
+
+.between{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.one {
+    flex-basis: 33.33%;
+}
+
+.two {
+    flex-basis: 66.66%;
+}
