@@ -21,25 +21,23 @@
 
 <script>
 import CardVue from '../../components/CardVue.vue'
+import {login} from '../../services'
 export default{
     components: { 
         CardVue,
     },
     data : () => ({
-        username:'',
-        API_URL:process.env.VUE_APP_API_URL
+        username:''
     }),
     methods:{
         async handleLogin(e){
             e.preventDefault()
             let data = new FormData()
             data.append('username',this.username)
-            const res = await fetch(this.API_URL +'index.php?module=auth/login',{
-                method:'POST',
-                body:data
-            })
-            const json = await res.json()
-            console.log(json)
+            const res = await login(data)
+            if(res.status == 'success'){
+                window.location.reload()
+            }
         },
     }
 }

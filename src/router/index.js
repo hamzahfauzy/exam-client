@@ -3,45 +3,69 @@ import HomeView from '../views/HomeView.vue'
 import StartView from '../views/StartView.vue'
 import FinishView from '../views/FinishView.vue'
 import ExamView from '../views/ExamView.vue'
+import LoginView from '../views/auth/LoginView.vue'
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: HomeView,
+    beforeEnter: (to,from,next) => {
+      var user = window.localStorage.getItem('token')
+      if(user == null)
+        next({'name':'login'})
+      else
+        next();
+    }
   },
   {
-    path: '/start',
+    path: '/start/:id',
     name: 'start',
-    component: StartView
+    component: StartView,
+    beforeEnter: (to,from,next) => {
+      var user = window.localStorage.getItem('token')
+      if(user == null)
+        next({'name':'login'})
+      else
+        next();
+    }
   },
   {
-    path: '/exam',
+    path: '/exam/:id',
     name: 'exam',
-    component: ExamView
+    component: ExamView,
+    beforeEnter: (to,from,next) => {
+      var user = window.localStorage.getItem('token')
+      if(user == null)
+        next({'name':'login'})
+      else
+        next();
+    }
   },
    {
     path: '/finish',
     name: 'finish',
-    component: FinishView
+    component: FinishView,
+    beforeEnter: (to,from,next) => {
+      var user = window.localStorage.getItem('token')
+      if(user == null)
+        next({'name':'login'})
+      else
+        next();
+    }
   },
   {
     path: '/login',
     name: 'login',
-    component: function(){
-      return import(/* webpackChunkName: "about" */ '../views/auth/LoginView.vue')
+    component: LoginView,
+    beforeEnter: (to,from,next) => {
+      var user = window.localStorage.getItem('token')
+      if(user != null)
+        next({'name':'home'})
+      else
+        next();
     }
   },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: function () {
-      return import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-    }
-  }
 ]
 
 const router = createRouter({
