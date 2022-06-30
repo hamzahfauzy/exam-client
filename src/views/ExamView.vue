@@ -3,20 +3,22 @@
         <template v-slot:header>
             <div class="between">
                 <h2>{{selectedCategory.name}}</h2>
-                <p>{{selectedCategory.countdown}}</p>
+                <p v-if="selectedCategory.has_timer">{{ count }}</p>
             </div>
         </template>
         <template v-slot:body>
             <div v-for="post in selectedCategory.posts" :key="post.id" class="exam">
                 <p v-html="post.post_content"></p>
-                <div class="option" v-for="item in post.items" :key="'exam-'+post.id+'-option-'+item.id" @click="handleAnswer(post,item)">
+                <div class="option" v-for="item in post.items" :key="'exam-'+post.id+'-option-'+item.id"
+                    @click="handleAnswer(post,item)">
                     <input type="radio" name="konten" :id="'exam-'+post.id+'-option-'+item.id">
                     <label :for="'exam-'+post.id+'-option-'+item.id" v-html="item.post_content"></label>
                 </div>
             </div>
             <div class="between">
                 <button class="one secondary" @click="handlePrev">Kembali</button>
-                <button class="two primary" @click="handleNext">{{selectedCategoryIdx == categories.length-1 ? 'Selesai' : 'Selanjutnya'}}</button>
+                <button class="two primary" @click="handleNext">{{selectedCategoryIdx == categories.length-1 ? 'Selesai'
+                : 'Selanjutnya'}}</button>
             </div>
         </template>
         <template v-slot:footer>
@@ -35,9 +37,16 @@
         }, 
         data: ()=>({
             selectedCategory:{},
+            interval:null,
+            counts: [],
+            count: "00:00:00",
+            time: 0,
         }),
-        created(){
-            this.load()
+        async created(){
+            await this.load()
+            
+            if (this.selectedCategory.has_timer == "Countdown")
+                this.countdown()
         },  
         computed:{
             categories(){
@@ -54,7 +63,48 @@
             async load(){
                 const res =  await category(this.currentCategory.id)
                 this.selectedCategory = res.data
-                console.log(res)
+                if (res.data.has_timer == "Countdown") {
+                    this.selectedCategory.countdown = this.currentCategory.countdown
+                    this.counts = this.selectedCategory.countdown.split(':')
+                    this.time = parseInt(this.counts[2])
+                    this.time += parseInt(this.counts[1]) * 60
+                    this.time += (parseInt(this.counts[0]) * 60) * 60
+                }
+            },
+            countdown() {
+                this.interval = setInterval(() => {
+
+                    if (this.counts[1] < 0 && this.counts[0] > 0) {
+                        this.counts[0] -= 1
+                        this.counts[1] = 59
+                    }
+
+                    if (this.counts[2] < 0 && this.counts[1] > 0) {
+                        this.counts[1] -= 1
+                        this.counts[2] = 59
+                    }
+
+                    if (this.time == 0) {
+                        this.handleNext()
+                    } else {
+                        this.count = `${this.counts[0]}:${this.counts[1]}:${this.counts[2]}`
+                    }
+
+                    this.counts[2]--;
+                    this.time--;
+
+                    this.selectedCategory.countdown = `${this.counts[0]}:${this.counts[1]}:${this.counts[2]}`
+
+                    this.categories.forEach( (cat) => {
+                        if (cat.id == this.selectedCategory.id) {
+                            cat.countdown = this.selectedCategory.countdown
+                        }
+                    }, this.categories)
+
+
+                    localStorage.setItem("categories",JSON.stringify(this.categories))
+
+                }, 1000)
             },
             handlePrev(){
                 if(this.selectedCategoryIdx == 0){
@@ -65,6 +115,7 @@
                 }
             },
             async handleNext(){
+                await clearInterval(this.interval)
                 if (this.selectedCategoryIdx == this.categories.length - 1){
                     let data = new FormData()
                     data.append('exam_id', this.$route.params.id)
