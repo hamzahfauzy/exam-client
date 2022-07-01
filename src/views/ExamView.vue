@@ -17,7 +17,7 @@
             </div>
             <div class="between">
                 <!-- <button class="one secondary" @click="handlePrev">Kembali</button> -->
-                <button class="two primary" @click="handleNext">{{selectedCategoryIdx == categories.length-1 ? 'Selesai'
+                <button class="full primary" @click="handleNext">{{selectedCategoryIdx == categories.length-1 ? 'Selesai'
                 : 'Selanjutnya'}}</button>
             </div>
         </template>
