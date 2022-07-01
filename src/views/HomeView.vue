@@ -7,7 +7,7 @@
     <template v-slot:body>
       <p>{{participant.name}}</p>
       <p>{{participant.id_number}}</p>
-      <button class="primary" v-for="exam in exams" :key="exam.id" @click="handleStart(exam)" v-show="exam.status == 'start' || exam.status == ''">{{ exam.status == 'start' ? 'Lanjutkan' : 'Mulai'}}</button>
+      <button class="primary" v-for="exam in exams" :key="exam.id" @click="handleStart(exam)" v-show="exam.exam.in_time || exam.status == 'start'">{{ exam.status == 'start' ? 'Lanjutkan' : 'Mulai'}}</button>
       <button class="secondary" @click="logout">Keluar</button>
     </template>
     <template v-slot:footer>
@@ -46,7 +46,7 @@ export default {
       if(exam.status == 'start'){
         const cats = await categories(exam.exam_id)
         localStorage.setItem('categories',JSON.stringify(cats.data))
-        localStorage.setItem('selectedCategory', localStorage.getItem('selectedCategory') ?? 0)
+        localStorage.setItem('selectedCategory', exam.category_index ?? 0)
         this.$router.push({ name: 'exam', params: { id: exam.exam_id } })
       }else{
         this.$router.push({name:'start',params:{id:exam.exam_id}})

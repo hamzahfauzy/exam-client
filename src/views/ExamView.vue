@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="between">
-                <button class="one secondary" @click="handlePrev">Kembali</button>
+                <!-- <button class="one secondary" @click="handlePrev">Kembali</button> -->
                 <button class="two primary" @click="handleNext">{{selectedCategoryIdx == categories.length-1 ? 'Selesai'
                 : 'Selanjutnya'}}</button>
             </div>
@@ -29,7 +29,7 @@
 
 <script>
     import CardVue from '@/components/CardVue.vue'
-    import { answer, category, finish } from '@/services'
+    import { answer, category, finish, saveCategoryIndex } from '@/services'
 
     export default {
         components:{
@@ -41,26 +41,29 @@
             counts: [],
             count: "00:00:00",
             time: 0,
+            selectedCategoryIdx:localStorage.getItem('selectedCategory'),
+            categories:JSON.parse(localStorage.getItem("categories"))
         }),
         async created(){
             await this.load()
-            
-            if (this.selectedCategory.has_timer == "Countdown")
-                this.countdown()
-        },  
+        }, 
         computed:{
-            categories(){
-                return JSON.parse(localStorage.getItem("categories"))
-            },
-            selectedCategoryIdx(){
-                return parseInt(localStorage.getItem('selectedCategory'))
-            },
+            // categories(){
+            //     return JSON.parse(localStorage.getItem("categories"))
+            // },
+            // selectedCategoryIdx(){
+            //     return parseInt(localStorage.getItem('selectedCategory'))
+            // },
             currentCategory(){
                 return this.categories[this.selectedCategoryIdx]
             },
         },
         methods:{
             async load(){
+                // save category index
+                console.log(this.selectedCategoryIdx)
+                saveCategoryIndex(this.$route.params.id, this.selectedCategoryIdx)
+
                 const res =  await category(this.currentCategory.id)
                 this.selectedCategory = res.data
                 if (res.data.has_timer == "Countdown") {
@@ -70,6 +73,9 @@
                     this.time += parseInt(this.counts[1]) * 60
                     this.time += (parseInt(this.counts[0]) * 60) * 60
                 }
+
+                if (this.selectedCategory.has_timer == "Countdown")
+                    this.countdown()
             },
             countdown() {
                 this.interval = setInterval(() => {
@@ -95,23 +101,27 @@
 
                     this.selectedCategory.countdown = `${this.counts[0]}:${this.counts[1]}:${this.counts[2]}`
 
-                    this.categories.forEach( (cat) => {
-                        if (cat.id == this.selectedCategory.id) {
-                            cat.countdown = this.selectedCategory.countdown
-                        }
-                    }, this.categories)
+                    // this.categories.forEach( (cat) => {
+                    //     if (cat.id == this.selectedCategory.id) {
+                    //         cat.countdown = this.selectedCategory.countdown
+                    //     }
+                    // }, this.categories)
 
+                    this.categories[this.selectedCategoryIdx] = this.selectedCategory
 
                     localStorage.setItem("categories",JSON.stringify(this.categories))
 
                 }, 1000)
             },
-            handlePrev(){
+            async handlePrev(){
+                await clearInterval(this.interval)
                 if(this.selectedCategoryIdx == 0){
                     this.$router.go(-1)
                 }else{
-                    localStorage.setItem('selectedCategory',this.selectedCategoryIdx-1)
-                    window.location.reload()
+                    this.selectedCategoryIdx = this.selectedCategoryIdx-1
+                    localStorage.setItem('selectedCategory',this.selectedCategoryIdx)
+                    // window.location.reload()
+                    await this.load()
                 }
             },
             async handleNext(){
@@ -123,8 +133,10 @@
                     console.log(res)
                     this.$router.push({name:'finish'})
                 }else{
-                    localStorage.setItem('selectedCategory',this.selectedCategoryIdx+1)
-                    window.location.reload()
+                    this.selectedCategoryIdx = this.selectedCategoryIdx+1
+                    localStorage.setItem('selectedCategory',this.selectedCategoryIdx)
+                    // window.location.reload()
+                    await this.load()
                 }
             },
             async handleAnswer(question,ans){

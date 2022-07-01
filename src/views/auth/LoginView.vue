@@ -36,7 +36,8 @@ export default{
             data.append('username',this.username)
             const res = await login(data)
             if(res.status == 'success'){
-                window.location.reload()
+                // window.location.reload()
+                this.$router.push({name:'home'})
             }
         },
     }

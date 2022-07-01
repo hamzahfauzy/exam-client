@@ -56,6 +56,22 @@ async function category(id){
     return json
 }
 
+async function saveCategoryIndex(exam_id, category_index){
+    const token = localStorage.getItem("token")
+    var formData = new FormData;
+    formData.append('exam_id',exam_id)
+    formData.append('category_index',category_index)
+    const res = await fetch(API_URL +'index.php?module=sequences/save-category-index',{
+        method:'POST',
+        headers:{
+            'Authorization':'Bearer '+token,
+        },
+        body:formData
+    })
+    const json = await res.json()
+    return json
+}
+
 async function answer(data){
     const token = localStorage.getItem("token")
     const res = await fetch(API_URL +'index.php?module=sequences/answer',{
@@ -82,4 +98,4 @@ async function finish(data){
     return json
 }
 
-export {login,dashboard,start,categories,category,answer,finish}
+export {login,dashboard,start,categories,category,answer,finish,saveCategoryIndex}
