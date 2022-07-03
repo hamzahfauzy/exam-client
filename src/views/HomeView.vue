@@ -6,9 +6,16 @@
     </template>
     <template v-slot:body>
       <div v-if="participant">
-        <p>{{participant.name}}</p>
+        <p><b>{{participant.name}}</b></p>
         <p>{{participant.id_number}}</p>
-        <button class="btn-home primary" v-for="exam in exams" :key="exam.id" @click="handleStart(exam)" v-show="exam.exam.in_time || exam.status == 'start'">{{ exam.status == 'start' ? 'Lanjutkan' : 'Mulai'}}</button>
+        <br>
+        <template v-for="exam in exams" :key="exam.id">
+          <p>{{exam.exam.name}}</p>
+          <p>{{exam.exam.start_time}}</p>
+          <a :href="exam.exam.video_url" target="_blank" class="btn btn-home primary">Video Tutorial</a>
+          <button class="btn-home primary" @click="handleStart('demo'+exam.exam.id)">Uji Coba</button>
+          <button class="btn-home primary" @click="handleStart(exam)" v-show="exam.exam.in_time && exam.status != 'finish'">{{ exam.status == 'start' ? 'Lanjutkan' : 'Mulai'}}</button>
+        </template>
         <button class="btn-home secondary" @click="doLogout">Keluar</button>
       </div>
     </template>
@@ -49,17 +56,29 @@ export default {
       this.$router.push({'name':'login'});
     },
     async handleStart(exam){
+      var exam_id = ''
+      if(exam.includes('demo'))
+      {
+        exam_id = exam.replace('demo','')
+      }
+      const cats = await categories(exam_id)
+      if(cats.message == "Unauthorized")
+      {
+          this.doLogout()
+      }
+      localStorage.setItem('categories',JSON.stringify(cats.data))
       if(exam.status == 'start'){
-        const cats = await categories(exam.exam_id)
-        if(cats.message == "Unauthorized")
-        {
-            this.doLogout()
-        }
-        localStorage.setItem('categories',JSON.stringify(cats.data))
         localStorage.setItem('selectedCategory', exam.category_index ?? 0)
         this.$router.push({ name: 'exam', params: { id: exam.exam_id } })
       }else{
-        this.$router.push({name:'start',params:{id:exam.exam_id}})
+        if(exam.includes('demo'))
+        {
+          this.$router.push({name:'start',params:{id:exam}})
+        }
+        else
+        {
+          this.$router.push({name:'start',params:{id:exam.exam_id}})
+        }
       }
     }
   }

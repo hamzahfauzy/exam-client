@@ -1,23 +1,22 @@
 <template>
     <CardVue>
         <template v-slot:header>
-            <div class="between">
-                <h2>{{selectedCategory.name}}</h2>
+            <div id="sticky" :class="{ fixed: isFixed }" class="between">
+                <h2 v-if="!$route.params.id.includes('demo')">{{selectedCategory.name}}</h2>
                 <p v-if="selectedCategory.has_timer && selectedCategory.has_timer != 'No'">{{ count }}</p>
             </div>
         </template>
         <template v-slot:body>
-            <div v-for="post in selectedCategory.posts" :key="post.id" class="exam">
-                <p v-html="post.post_content"></p>
-                <div class="option" v-for="item in post.items" :key="'exam-'+post.id+'-option-'+item.id">
-                    <input type="radio" :name="'option-'+post.id" :id="'exam-'+post.id+'-option-'+item.id" @change="handleAnswer(post,item)" :checked="parseInt(item.selected)">
+            <div v-for="(post, post_idx) in selectedCategory.posts" :key="post.id" class="exam">
+                <div class="exam-content" v-html="post.post_content"></div>
+                <div class="option" v-for="(item, item_idx) in post.items" :key="'exam-'+post.id+'-option-'+item.id">
+                    <input type="radio" :name="'option-'+post.id" :id="'exam-'+post.id+'-option-'+item.id" @change="handleAnswer(post,item, post_idx, item_idx)" :checked="parseInt(item.selected)">
                     <label :for="'exam-'+post.id+'-option-'+item.id" v-html="item.post_content"></label>
                 </div>
             </div>
             <div class="between">
                 <!-- <button class="one secondary" @click="handlePrev">Kembali</button> -->
-                <button class="full primary" @click="handleNext">{{selectedCategoryIdx == categories.length-1 ? 'Selesai'
-                : 'Selanjutnya'}}</button>
+                <button class="full primary" @click="handleNext">{{nextText}}</button>
             </div>
         </template>
         <template v-slot:footer>
@@ -35,15 +34,18 @@
             CardVue
         }, 
         data: ()=>({
+            isFixed:false,
             selectedCategory:{},
             interval:null,
             counts: [],
             count: "00:00:00",
             time: 0,
             selectedCategoryIdx:localStorage.getItem('selectedCategory'),
-            categories:JSON.parse(localStorage.getItem("categories"))
+            categories:JSON.parse(localStorage.getItem("categories")),
+            nextText:'Sedang Memuat Soal...'
         }),
         async created(){
+            window.addEventListener('scroll', this.handleScroll);
             await this.load()
         }, 
         computed:{
@@ -52,6 +54,13 @@
             },
         },
         methods:{
+            handleScroll(){
+                if (window.scrollY >= 100) {
+                    this.isFixed = true
+                } else {
+                    this.isFixed = false
+                }
+            },
             async load(){
                 var exam_id = this.$route.params.id
                 const res =  await category(this.currentCategory.id, exam_id)
@@ -72,6 +81,8 @@
 
                     this.countdown()
                 }
+
+                this.nextText = this.selectedCategoryIdx == this.categories.length-1 ? 'Selesai' : 'Selanjutnya'
             },
             countdown() {
                 this.interval = setInterval(() => {
@@ -86,7 +97,7 @@
                         this.counts[2] = 59
                     }
 
-                    if (this.time == 0) {
+                    if (this.time <= 0) {
                         this.handleNext()
                     } else {
                         this.count = `${this.counts[0]}:${this.counts[1]}:${this.counts[2]}`
@@ -115,11 +126,49 @@
                 }
             },
             async handleNext(){
+                if(this.nextText == "Tunggu Sebentar ...")
+                {
+                    alert("Silahkan tunggu sebentar")
+                    return
+                }
+
+                if(this.nextText == "Sedang Memuat Soal...")
+                {
+                    alert("Sedang Memuat Soal")
+                    return
+                }
+
+                if(this.selectedCategory.test_tool == 'HOLLAND' && this.selectedCategory.posts[0].post_as == 'Soal')
+                {
+                    // check required
+                    var numberOfChoice = 5
+                    var allRadio = document.querySelectorAll('input[type=radio]').length
+                    var questions = allRadio / numberOfChoice
+                    var selected = document.querySelectorAll('input[type=radio]:checked').length
+
+                    if(questions != selected)
+                    {
+                        alert("Maaf! Silahkan jawab semua soal terlebih dahulu.")
+                        return
+                    }
+                }
+                this.nextText = "Tunggu Sebentar ..."
                 await clearInterval(this.interval)
-                // save category index
-                saveCategoryIndex(this.$route.params.id, this.selectedCategoryIdx)
+
+                if(!this.$route.params.id.includes('demo'))
+                {
+                    // save category index
+                    saveCategoryIndex(this.$route.params.id, this.selectedCategoryIdx)
+                }
 
                 if (this.selectedCategoryIdx == this.categories.length - 1){
+                    if(this.$route.params.id.includes('demo'))
+                    {
+                        localStorage.removeItem('selectedCategory')
+                        localStorage.removeItem('categories')
+                        this.$router.push({name:'finish'})
+                        return
+                    }
                     let data = new FormData()
                     data.append('exam_id', this.$route.params.id)
                     const res = await finish(data)
@@ -128,15 +177,25 @@
                         logout()
                         this.$router.push({'name':'login'});
                     }
+
+                    localStorage.removeItem('selectedCategory')
+                    localStorage.removeItem('categories')
                     this.$router.push({name:'finish'})
                 }else{
                     this.selectedCategoryIdx = parseInt(this.selectedCategoryIdx)+1
                     localStorage.setItem('selectedCategory',this.selectedCategoryIdx)
                     // window.location.reload()
                     await this.load()
+                    window.scrollTo(0,0);
                 }
             },
-            async handleAnswer(question,ans){
+            async handleAnswer(question,ans,post_idx,item_idx){
+                this.selectedCategory.posts[post_idx].items.forEach(el => el.selected = 0)
+                this.selectedCategory.posts[post_idx].items[item_idx].selected = 1
+                if(this.$route.params.id.includes('demo'))
+                {
+                    return {}
+                }
                 let data = new FormData()
                 data.append('exam_id', this.$route.params.id)
                 data.append('question_id',question.id)

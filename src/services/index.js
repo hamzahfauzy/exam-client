@@ -47,7 +47,17 @@ async function categories(id){
 
 async function category(id, exam_id){
     const token = localStorage.getItem("token")
-    const res = await fetch(API_URL +'index.php?module=sequences/single-categories&category_id='+id+'&exam_id='+exam_id,{
+    var URL = ''
+    if(exam_id.includes('demo'))
+    {
+        exam_id = exam_id.replace('demo','')
+        URL = API_URL +'index.php?module=sequences/single-categories&category_id='+id+'&exam_id='+exam_id+'&demo=true'
+    }
+    else
+    {
+        URL = API_URL +'index.php?module=sequences/single-categories&category_id='+id+'&exam_id='+exam_id
+    }
+    const res = await fetch(URL,{
         headers:{
             'Authorization':'Bearer '+token,
         }
@@ -57,6 +67,10 @@ async function category(id, exam_id){
 }
 
 async function saveCategoryIndex(exam_id, category_index){
+    if(exam_id.includes('demo'))
+    {
+        return {}
+    }
     const token = localStorage.getItem("token")
     var formData = new FormData;
     formData.append('exam_id',exam_id)

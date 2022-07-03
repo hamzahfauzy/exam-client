@@ -7,11 +7,17 @@
         <template v-slot:body>
             <form @submit="handleLogin" class="form">
                 <div class="form-group">
-                    <label for="">Nama Pengguna / Nomor Ujian</label>
+                    <label for="">Username</label>
                     <input type="text" v-model="username">
                 </div>
                 <button class="primary">Masuk</button>
             </form>
+
+            <p align="center">
+                Bantuan (Whatsapp)<br>
+                0822-7650-0156 (Bapak Nanda)<br>
+                0813-6294-8177 (Ibu Mega)<br>
+            </p>
         </template>
         <template v-slot:footer>
             <p>Arunika IT Department 2022</p>

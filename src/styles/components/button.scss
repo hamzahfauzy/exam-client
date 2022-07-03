@@ -1,7 +1,7 @@
 $primary: #2A2975;
 $secondary: #FFA401;
 
-button {
+button, a.btn {
     cursor: pointer;
     border: 1px solid #333;
     background: #eaeaea;
@@ -9,19 +9,19 @@ button {
     transition: .5s;
 }
 
-button:hover {
+button:hover, a.btn {
     background: #333;
     color: white;
     box-shadow: 0 0 4px #333;
 }
 
-button.primary {
+button.primary, a.btn.primary {
     background: $primary;
     color: white;
     border: none;
 }
 
-button.secondary {
+button.secondary, a.btn.secondary {
     background: $secondary;
     color: #333;
     border: none;

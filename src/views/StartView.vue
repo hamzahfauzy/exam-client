@@ -58,6 +58,12 @@
         methods:{
             async handleSubmit(e){
                 e.preventDefault()
+                if(this.$route.params.id.includes('demo'))
+                {
+                    localStorage.setItem('selectedCategory',0)
+                    this.$router.push({ name: 'exam', params: { id: this.$route.params.id } })
+                    return
+                }
                 let metas = new FormData()
                 metas.append('user_metas[name]',this.name)
                 metas.append('user_metas[school]',this.school)
