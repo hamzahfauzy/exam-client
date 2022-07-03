@@ -14,9 +14,8 @@
             </form>
 
             <p align="center">
-                Bantuan (Whatsapp)<br>
-                0822-7650-0156 (Bapak Nanda)<br>
-                0813-6294-8177 (Ibu Mega)<br>
+                Bantuan (Telegram)<br>
+                082185054088
             </p>
         </template>
         <template v-slot:footer>

@@ -7,26 +7,46 @@
             <form @submit="handleSubmit" class="form">
                 <div class="form-group">
                     <label for="">Nama</label>
-                    <input type="text" v-model="name" placeholder="Nama...">
+                    <input type="text" v-model="name" placeholder="Nama..." required>
                 </div>
-                <div class="form-group">
-                    <label for="">Asal Sekolah</label>
-                    <input type="text" v-model="school" placeholder="Asal Sekolah...">
-                </div>
-                <!-- <div class="form-group">
-                <label for="">Jurusan</label>
-                <input type="text" placeholder="Jurusan...">
-            </div> -->
                 <div class="form-group">
                     <label for="">Tempat Tanggal Lahir</label>
                     <div class="between">
-                        <input type="text" v-model="place_birth" placeholder="Tempat Lahir...">
-                        <input type="date" v-model="date_birth" placeholder="Tanggal Lahir...">
+                        <input type="text" v-model="place_birth" placeholder="Tempat Lahir..." required>
+                        <input type="date" v-model="date_birth" placeholder="Tanggal Lahir..." required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="">No Handphone</label>
-                    <input type="text" v-model="handphone" placeholder="No Handphone...">
+                    <label for="">Jenis Kelamin</label>
+                    <select v-model="gender" required>
+                        <option></option>
+                        <option>Laki-laki</option>
+                        <option>Perempuan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="">Nama SMA</label>
+                    <input type="text" v-model="school" placeholder="Nama SMA..." required>
+                </div>
+                <div class="form-group">
+                    <label for="">Asal SMP</label>
+                    <input type="text" v-model="middle_school" placeholder="Asal SMP..." required>
+                </div>
+                <div class="form-group">
+                    <label for="">Prestasi Akademik</label>
+                    <input type="text" v-model="academic" placeholder="Prestasi Akademik..." required>
+                </div>
+                <div class="form-group">
+                    <label for="">Prestasi Non Akademik</label>
+                    <input type="text" v-model="non_academic" placeholder="Prestasi Non Akademik..." required>
+                </div>
+                <div class="form-group">
+                    <label for="">Jurusan Yang Dipilih</label>
+                    <input type="text" v-model="major" placeholder="Jurusan..." required>
+                </div>
+                <div class="form-group">
+                    <label for="">Cita-cita</label>
+                    <input type="text" v-model="goals" placeholder="Cita-cita..." required>
                 </div>
                 <div class="between">
                     <button type="button" class="one secondary" @click="$router.go(-1)">Kembali</button>
@@ -49,12 +69,21 @@
             CardVue
         },
         data : () => ({
+           participant:JSON.parse(localStorage.getItem('participant')),
            name:'',
            school:'',
            place_birth:'',
            date_birth:'',
-           handphone:'',
+           academic:'',
+           non_academic:'',
+           major:'',
+           middle_school:'',
+           goals:'',
+           gender:'',
         }),
+        created(){
+            this.name = this.participant.name
+        },
         methods:{
             async handleSubmit(e){
                 e.preventDefault()
@@ -69,7 +98,11 @@
                 metas.append('user_metas[school]',this.school)
                 metas.append('user_metas[place_birth]',this.place_birth)
                 metas.append('user_metas[date_birth]',this.date_birth)
-                metas.append('user_metas[handphone]',this.handphone)
+                metas.append('user_metas[major]',this.major)
+                metas.append('user_metas[goals]',this.goals)
+                metas.append('user_metas[academic]',this.academic)
+                metas.append('user_metas[non_academic]',this.non_academic)
+                metas.append('user_metas[middle_school]',this.middle_school)
                 metas.append('exam_id',this.$route.params.id)
                 let res = await start(metas)
                 if(res.message == "Unauthorized")

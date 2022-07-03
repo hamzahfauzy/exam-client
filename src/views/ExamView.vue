@@ -9,10 +9,15 @@
         <template v-slot:body>
             <div v-for="(post, post_idx) in selectedCategory.posts" :key="post.id" class="exam">
                 <div class="exam-content" v-html="post.post_content"></div>
+                <template v-if="post.items && post.items.length > 1">
                 <div class="option" v-for="(item, item_idx) in post.items" :key="'exam-'+post.id+'-option-'+item.id">
                     <input type="radio" :name="'option-'+post.id" :id="'exam-'+post.id+'-option-'+item.id" @change="handleAnswer(post,item, post_idx, item_idx)" :checked="parseInt(item.selected)">
                     <label :for="'exam-'+post.id+'-option-'+item.id" v-html="item.post_content"></label>
                 </div>
+                </template>
+                <template v-if="post.items && post.items.length == 1">
+                    <input type="text" maxlength="2" @change="handleAnswer(post, $event.target.value)">
+                </template>
             </div>
             <div class="between">
                 <!-- <button class="one secondary" @click="handlePrev">Kembali</button> -->
@@ -189,9 +194,23 @@
                     window.scrollTo(0,0);
                 }
             },
-            async handleAnswer(question,ans,post_idx,item_idx){
-                this.selectedCategory.posts[post_idx].items.forEach(el => el.selected = 0)
-                this.selectedCategory.posts[post_idx].items[item_idx].selected = 1
+            async handleAnswer(question,ans,post_idx = -1,item_idx = -1){
+                var _answer = ''
+                if(post_idx > -1)
+                {
+                    this.selectedCategory.posts[post_idx].items.forEach(el => el.selected = 0)
+                    this.selectedCategory.posts[post_idx].items[item_idx].selected = 1
+                    _answer = ans.id
+                }
+                else
+                {
+                    if(ans.length <= 1)
+                    {
+                        return
+                    }
+
+                    _answer = ans
+                }
                 if(this.$route.params.id.includes('demo'))
                 {
                     return {}
@@ -199,7 +218,7 @@
                 let data = new FormData()
                 data.append('exam_id', this.$route.params.id)
                 data.append('question_id',question.id)
-                data.append('answer_id',ans.id)
+                data.append('answer_id',_answer)
                 const res = await answer(data)
                 if(res.message == "Unauthorized")
                 {

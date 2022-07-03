@@ -50,6 +50,8 @@ export default {
 
       this.participant = res.data.participant
       this.exams = res.data.exams
+
+      localStorage.setItem('participant',JSON.stringify(this.participant))
     },
     doLogout(){
       logout()
@@ -57,9 +59,13 @@ export default {
     },
     async handleStart(exam){
       var exam_id = ''
-      if(exam.includes('demo'))
+      if((typeof exam) == "string")
       {
         exam_id = exam.replace('demo','')
+      }
+      else
+      {
+        exam_id = exam.exam_id
       }
       const cats = await categories(exam_id)
       if(cats.message == "Unauthorized")
@@ -69,15 +75,15 @@ export default {
       localStorage.setItem('categories',JSON.stringify(cats.data))
       if(exam.status == 'start'){
         localStorage.setItem('selectedCategory', exam.category_index ?? 0)
-        this.$router.push({ name: 'exam', params: { id: exam.exam_id } })
+        this.$router.push({ name: 'exam', params: { id: exam_id } })
       }else{
-        if(exam.includes('demo'))
+        if((typeof exam) == "string")
         {
           this.$router.push({name:'start',params:{id:exam}})
         }
         else
         {
-          this.$router.push({name:'start',params:{id:exam.exam_id}})
+          this.$router.push({name:'start',params:{id:exam_id}})
         }
       }
     }

@@ -22,16 +22,16 @@ body{
 }
 
 .card{
-    width:450px;
+    max-width:720px;
     border:1px solid #333;
-    padding:20px 40px;
+    padding:10px 20px;
     border-radius: 6px;
     margin: auto;
     text-align: center;
 
     .card-header {
         border-bottom: 1px solid #333;
-        padding-bottom: 20px;
+        padding:10px 0px;
     }
     
     .card-body{
@@ -95,8 +95,13 @@ body{
     margin-bottom:5px;
 }
 
-.exam-content p {
+.exam-content {
+    img {
+        max-width: 100%;
+    }
+    p {
     margin-bottom:10px;
+    }
 }
 
 #sticky.fixed {
