@@ -36,8 +36,11 @@ export default{
             data.append('username',this.username)
             const res = await login(data)
             if(res.status == 'success'){
-                // window.location.reload()
                 this.$router.push({name:'home'})
+            }
+            else
+            {
+                alert("Data peserta tidak ditemukan")
             }
         },
     }

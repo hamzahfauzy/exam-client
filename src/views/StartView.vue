@@ -42,7 +42,7 @@
 
 <script>
     import CardVue from '@/components/CardVue.vue'
-    import {start} from '../services'
+    import {start, logout} from '../services'
 
     export default {
         components:{
@@ -66,6 +66,11 @@
                 metas.append('user_metas[handphone]',this.handphone)
                 metas.append('exam_id',this.$route.params.id)
                 let res = await start(metas)
+                if(res.message == "Unauthorized")
+                {
+                    logout()
+                    this.$router.push({'name':'login'});
+                }
                 if(res.status == 'success'){
                     localStorage.setItem('selectedCategory',0)
                     this.$router.push({ name: 'exam', params: { id: this.$route.params.id } })

@@ -3,15 +3,14 @@
         <template v-slot:header>
             <div class="between">
                 <h2>{{selectedCategory.name}}</h2>
-                <p v-if="selectedCategory.has_timer">{{ count }}</p>
+                <p v-if="selectedCategory.has_timer && selectedCategory.has_timer != 'No'">{{ count }}</p>
             </div>
         </template>
         <template v-slot:body>
             <div v-for="post in selectedCategory.posts" :key="post.id" class="exam">
                 <p v-html="post.post_content"></p>
-                <div class="option" v-for="item in post.items" :key="'exam-'+post.id+'-option-'+item.id"
-                    @click="handleAnswer(post,item)">
-                    <input type="radio" name="konten" :id="'exam-'+post.id+'-option-'+item.id">
+                <div class="option" v-for="item in post.items" :key="'exam-'+post.id+'-option-'+item.id">
+                    <input type="radio" :name="'option-'+post.id" :id="'exam-'+post.id+'-option-'+item.id" @change="handleAnswer(post,item)" :checked="parseInt(item.selected)">
                     <label :for="'exam-'+post.id+'-option-'+item.id" v-html="item.post_content"></label>
                 </div>
             </div>
@@ -29,7 +28,7 @@
 
 <script>
     import CardVue from '@/components/CardVue.vue'
-    import { answer, category, finish, saveCategoryIndex } from '@/services'
+    import { answer, logout, category, finish, saveCategoryIndex } from '@/services'
 
     export default {
         components:{
@@ -48,34 +47,31 @@
             await this.load()
         }, 
         computed:{
-            // categories(){
-            //     return JSON.parse(localStorage.getItem("categories"))
-            // },
-            // selectedCategoryIdx(){
-            //     return parseInt(localStorage.getItem('selectedCategory'))
-            // },
             currentCategory(){
                 return this.categories[this.selectedCategoryIdx]
             },
         },
         methods:{
             async load(){
-                // save category index
-                console.log(this.selectedCategoryIdx)
-                saveCategoryIndex(this.$route.params.id, this.selectedCategoryIdx)
+                var exam_id = this.$route.params.id
+                const res =  await category(this.currentCategory.id, exam_id)
+                if(res.message == "Unauthorized")
+                {
+                    logout()
+                    this.$router.push({'name':'login'});
+                }
 
-                const res =  await category(this.currentCategory.id)
                 this.selectedCategory = res.data
-                if (res.data.has_timer == "Countdown") {
+                let timer = res.data.has_timer
+                if (timer == "Countdown") {
                     this.selectedCategory.countdown = this.currentCategory.countdown
                     this.counts = this.selectedCategory.countdown.split(':')
                     this.time = parseInt(this.counts[2])
                     this.time += parseInt(this.counts[1]) * 60
                     this.time += (parseInt(this.counts[0]) * 60) * 60
-                }
 
-                if (this.selectedCategory.has_timer == "Countdown")
                     this.countdown()
+                }
             },
             countdown() {
                 this.interval = setInterval(() => {
@@ -101,12 +97,6 @@
 
                     this.selectedCategory.countdown = `${this.counts[0]}:${this.counts[1]}:${this.counts[2]}`
 
-                    // this.categories.forEach( (cat) => {
-                    //     if (cat.id == this.selectedCategory.id) {
-                    //         cat.countdown = this.selectedCategory.countdown
-                    //     }
-                    // }, this.categories)
-
                     this.categories[this.selectedCategoryIdx] = this.selectedCategory
 
                     localStorage.setItem("categories",JSON.stringify(this.categories))
@@ -118,7 +108,7 @@
                 if(this.selectedCategoryIdx == 0){
                     this.$router.go(-1)
                 }else{
-                    this.selectedCategoryIdx = this.selectedCategoryIdx-1
+                    this.selectedCategoryIdx = parseInt(this.selectedCategoryIdx)-1
                     localStorage.setItem('selectedCategory',this.selectedCategoryIdx)
                     // window.location.reload()
                     await this.load()
@@ -126,14 +116,21 @@
             },
             async handleNext(){
                 await clearInterval(this.interval)
+                // save category index
+                saveCategoryIndex(this.$route.params.id, this.selectedCategoryIdx)
+
                 if (this.selectedCategoryIdx == this.categories.length - 1){
                     let data = new FormData()
                     data.append('exam_id', this.$route.params.id)
                     const res = await finish(data)
-                    console.log(res)
+                    if(res.message == "Unauthorized")
+                    {
+                        logout()
+                        this.$router.push({'name':'login'});
+                    }
                     this.$router.push({name:'finish'})
                 }else{
-                    this.selectedCategoryIdx = this.selectedCategoryIdx+1
+                    this.selectedCategoryIdx = parseInt(this.selectedCategoryIdx)+1
                     localStorage.setItem('selectedCategory',this.selectedCategoryIdx)
                     // window.location.reload()
                     await this.load()
@@ -145,7 +142,11 @@
                 data.append('question_id',question.id)
                 data.append('answer_id',ans.id)
                 const res = await answer(data)
-                console.log(res)
+                if(res.message == "Unauthorized")
+                {
+                    logout()
+                    this.$router.push({'name':'login'});
+                }
             }
         },
     }

@@ -45,9 +45,9 @@ async function categories(id){
     return json
 }
 
-async function category(id){
+async function category(id, exam_id){
     const token = localStorage.getItem("token")
-    const res = await fetch(API_URL +'index.php?module=sequences/single-categories&category_id='+id,{
+    const res = await fetch(API_URL +'index.php?module=sequences/single-categories&category_id='+id+'&exam_id='+exam_id,{
         headers:{
             'Authorization':'Bearer '+token,
         }
@@ -98,4 +98,9 @@ async function finish(data){
     return json
 }
 
-export {login,dashboard,start,categories,category,answer,finish,saveCategoryIndex}
+function logout()
+{
+    localStorage.removeItem('token');
+}
+
+export {login,logout,dashboard,start,categories,category,answer,finish,saveCategoryIndex}
