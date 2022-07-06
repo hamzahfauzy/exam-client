@@ -91,6 +91,42 @@
             },
             countdown() {
                 this.interval = setInterval(() => {
+                    var compareDate = new Date();
+                    var additional = compareDate.getTime() + (parseInt(this.time)*1000);
+                    var dateEntered = new Date(additional); //just for this demo today + 7 days
+                    
+                    var now = new Date();
+                    var difference = dateEntered.getTime() - now.getTime();
+
+                    if (difference <= 0) {
+
+                        // Timer done
+                        this.handleNext()
+                    
+                    } else {
+                        var seconds = Math.floor(difference / 1000);
+                        var minutes = Math.floor(seconds / 60);
+                        var hours = Math.floor(minutes / 60);
+                        // var days = Math.floor(hours / 24);
+
+                        hours %= 24;
+                        minutes %= 60;
+                        seconds %= 60;
+
+                        this.count = `${hours}:${minutes}:${seconds}`
+
+                        this.selectedCategory.countdown = `${hours}:${minutes}:${seconds}`
+
+                        this.categories[this.selectedCategoryIdx] = this.selectedCategory
+
+                        localStorage.setItem("categories",JSON.stringify(this.categories))
+
+                        this.time--
+                    }
+                }, 1000);
+            },
+            oldcountdown() {
+                this.interval = setInterval(() => {
 
                     if (this.counts[1] < 0 && this.counts[0] > 0) {
                         this.counts[0] -= 1
@@ -167,6 +203,11 @@
                 }
 
                 if (this.selectedCategoryIdx == this.categories.length - 1){
+                    var c = confirm('Apakah anda yakin akan menyelesaikan ujian ?')
+                    if(!c)
+                    {
+                        return 
+                    }
                     if(this.$route.params.id.includes('demo'))
                     {
                         localStorage.removeItem('selectedCategory')
@@ -176,16 +217,20 @@
                     }
                     let data = new FormData()
                     data.append('exam_id', this.$route.params.id)
-                    const res = await finish(data)
-                    if(res.message == "Unauthorized")
-                    {
-                        logout()
-                        this.$router.push({'name':'login'});
+                    try {
+                        const res = await finish(data)
+                        if(res.message == "Unauthorized")
+                        {
+                            logout()
+                            this.$router.push({'name':'login'});
+                        }
+    
+                        localStorage.removeItem('selectedCategory')
+                        localStorage.removeItem('categories')
+                        this.$router.push({name:'finish'})
+                    } catch (error) {
+                        this.nextText = 'Selanjutnya'
                     }
-
-                    localStorage.removeItem('selectedCategory')
-                    localStorage.removeItem('categories')
-                    this.$router.push({name:'finish'})
                 }else{
                     this.selectedCategoryIdx = parseInt(this.selectedCategoryIdx)+1
                     localStorage.setItem('selectedCategory',this.selectedCategoryIdx)
@@ -219,11 +264,15 @@
                 data.append('exam_id', this.$route.params.id)
                 data.append('question_id',question.id)
                 data.append('answer_id',_answer)
-                const res = await answer(data)
-                if(res.message == "Unauthorized")
-                {
-                    logout()
-                    this.$router.push({'name':'login'});
+                try {
+                    const res = await answer(data)
+                    if(res.message == "Unauthorized")
+                    {
+                        logout()
+                        this.$router.push({'name':'login'});
+                    }
+                } catch (error) {
+                    this.handleAnswer(question, ans, post_idx, item_idx)
                 }
             }
         },

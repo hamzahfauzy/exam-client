@@ -50,7 +50,7 @@
                 </div>
                 <div class="between">
                     <button type="button" class="one secondary" @click="$router.go(-1)">Kembali</button>
-                    <button class="two primary">Mulai</button>
+                    <button class="two primary" :disabled="submit_.disabled">{{submit_.text}}</button>
                 </div>
             </form>
         </template>
@@ -69,6 +69,10 @@
             CardVue
         },
         data : () => ({
+           submit_:{
+               text:'Mulai',
+               disabled:false,
+           },
            participant:JSON.parse(localStorage.getItem('participant')),
            name:'',
            school:'',
@@ -87,6 +91,8 @@
         methods:{
             async handleSubmit(e){
                 e.preventDefault()
+                this.submit_.text = 'Mengirim Data...'
+                this.submit_.disabled = true
                 if(this.$route.params.id.includes('demo'))
                 {
                     localStorage.setItem('selectedCategory',0)
@@ -104,15 +110,22 @@
                 metas.append('user_metas[non_academic]',this.non_academic)
                 metas.append('user_metas[middle_school]',this.middle_school)
                 metas.append('exam_id',this.$route.params.id)
-                let res = await start(metas)
-                if(res.message == "Unauthorized")
-                {
-                    logout()
-                    this.$router.push({'name':'login'});
-                }
-                if(res.status == 'success'){
-                    localStorage.setItem('selectedCategory',0)
-                    this.$router.push({ name: 'exam', params: { id: this.$route.params.id } })
+                try {
+                    let res = await start(metas)
+                    if(res.message == "Unauthorized")
+                    {
+                        logout()
+                        this.$router.push({'name':'login'});
+                    }
+                    if(res.status == 'success'){
+                        localStorage.setItem('selectedCategory',0)
+                        this.$router.push({ name: 'exam', params: { id: this.$route.params.id } })
+                    }
+                    this.submit_.text = 'Mulai'
+                    this.submit_.disabled = false
+                } catch (error) {
+                    this.submit_.text = 'Mulai'
+                    this.submit_.disabled = false
                 }
             }
         }
