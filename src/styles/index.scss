@@ -113,3 +113,14 @@ body{
     left: 0;
     border-bottom: 1px solid #000;
 }
+
+.alert {
+    padding:10px;
+    color:#FFF;
+    &.danger {
+        background-color: red;
+    }
+    &.warning {
+        background-color: orange;
+    }
+}

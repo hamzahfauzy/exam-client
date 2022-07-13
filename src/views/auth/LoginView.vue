@@ -5,6 +5,14 @@
             <h2>Arunika Test Platform</h2>
         </template>
         <template v-slot:body>
+            <div class="alert danger" v-if="!isChrome">
+                Demi kelancaran ujian, harap gunakan browser google chrome.
+            </div>
+
+            <div class="alert warning" v-if="isChrome">
+                Demi kelancaran ujian, Pastikan gunakan google chrome versi terbaru.
+            </div>
+
             <form @submit="handleLogin" class="form">
                 <div class="form-group">
                     <label for="">Username</label>
@@ -32,7 +40,8 @@ export default{
         CardVue,
     },
     data : () => ({
-        username:''
+        username:'',
+        isChrome:window.chrome
     }),
     methods:{
         async handleLogin(e){
