@@ -14,7 +14,7 @@
           <p>{{exam.exam.start_time}}</p>
           <a :href="exam.exam.video_url" target="_blank" class="btn btn-home primary">Video Tutorial</a>
           <button class="btn-home primary" @click="handleStart('demo'+exam.exam.id)">Uji Coba</button>
-          <button class="btn-home primary" v-show="!exam.exam.in_time && exam.status == ''">Tidak ada ujian</button>
+          <button class="btn-home primary" v-show="!exam.exam.in_time && exam.status == null">Tidak ada ujian</button>
           <button class="btn-home primary" @click="handleStart(exam)" v-show="exam.exam.in_time && exam.status != 'finish'">{{ exam.status == 'start' ? 'Lanjutkan' : 'Mulai'}}</button>
           <button class="btn-home primary" v-show="exam.status == 'finish'">Ujian telah selesai dilaksanakan</button>
         </template>

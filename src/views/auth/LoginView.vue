@@ -39,6 +39,7 @@ export default{
             e.preventDefault()
             let data = new FormData()
             data.append('username',this.username)
+            data.append('user_agent',navigator.userAgent)
             const res = await login(data)
             if(res.status == 'success'){
                 this.$router.push({name:'home'})
