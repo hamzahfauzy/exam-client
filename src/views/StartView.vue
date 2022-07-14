@@ -101,6 +101,7 @@
                 }
                 let metas = new FormData()
                 metas.append('user_metas[name]',this.name)
+                metas.append('user_metas[gender]',this.gender)
                 metas.append('user_metas[school]',this.school)
                 metas.append('user_metas[place_birth]',this.place_birth)
                 metas.append('user_metas[date_birth]',this.date_birth)
